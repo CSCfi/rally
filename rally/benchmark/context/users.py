@@ -247,6 +247,8 @@ class UserGenerator(base.Context):
                   {"users": users_num, "threads": threads})
         self.context["users"] = self._create_users()
 	LOG.warning("Users: {0}".format(self.context["users"]))
+	for user in self.context["users"]:
+	    LOG.warning("endpoint: %s" % user["endpoint"])
 
         if len(self.context["users"]) < users_num:
             raise exceptions.ContextSetupFailure(
