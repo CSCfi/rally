@@ -235,6 +235,7 @@ class UserGenerator(base.Context):
         LOG.debug("Creating %(tenants)d tenants using %(threads)s threads" %
                   {"tenants": self.config["tenants"], "threads": threads})
         self.context["tenants"] = self._create_tenants()
+	LOG.warning("Tenants: {0}".format(self.context["tenants"]))
 
         if len(self.context["tenants"]) < self.config["tenants"]:
             raise exceptions.ContextSetupFailure(
@@ -245,6 +246,7 @@ class UserGenerator(base.Context):
         LOG.debug("Creating %(users)d users using %(threads)s threads" %
                   {"users": users_num, "threads": threads})
         self.context["users"] = self._create_users()
+	LOG.warning("Users: {0}".format(self.context["users"]))
 
         if len(self.context["users"]) < users_num:
             raise exceptions.ContextSetupFailure(
