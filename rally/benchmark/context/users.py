@@ -80,6 +80,21 @@ class UserGenerator(base.Context):
             "user_domain": {
                 "type": "string",
             },
+             "tenant_id": {
+                "type": "string"
+            },
+            "tenant_name": {
+                "type": "string"
+            },
+            "user_id": {
+                "type": "string"
+            },
+            "username": {
+                "type": "string"
+            },
+                "password": {
+            "type": "string"
+            }
         },
         "additionalProperties": False
     }
@@ -100,11 +115,13 @@ class UserGenerator(base.Context):
         self.context["users"] = []
         self.context["tenants"] = []
         self.endpoint = self.context["admin"]["endpoint"]
+	self.user_context = self.context["user_context"]["users"]
         # NOTE(boris-42): I think this is the best place for adding logic when
         #                 we are using pre created users or temporary. So we
         #                 should rename this class s/UserGenerator/UserContext/
         #                 and change a bit logic of populating lists of users
         #                 and tenants
+        LOG.debug("Context Object: {0}".format(context))
 
     def _remove_associated_networks(self):
         """Delete associated Nova networks from tenants."""
@@ -132,65 +149,32 @@ class UserGenerator(base.Context):
                                     {"tenant_id": tenant["id"], "ex": ex})
 
     def _create_tenants(self):
-        threads = self.config["resource_management_workers"]
-
         tenants = []
 
-        def publish(queue):
-            for i in range(self.config["tenants"]):
-                args = (self.config["project_domain"], self.task["uuid"], i)
-                queue.append(args)
-
-        def consume(cache, args):
-            domain, task_id, i = args
-            if "client" not in cache:
-                clients = osclients.Clients(self.endpoint)
-                cache["client"] = keystone.wrap(clients.keystone())
-            tenant = cache["client"].create_project(
-                self.PATTERN_TENANT % {"task_id": task_id, "iter": i}, domain)
-            tenant_dict = {"id": tenant.id, "name": tenant.name}
-            tenants.append(tenant_dict)
-
-        # NOTE(msdubov): cosume() will fill the tenants list in the closure.
-        broker.run(publish, consume, threads)
+        tenant_dict = { "id": self.user_context["tenant_id"],
+                        "name": self.user_context["tenant_name"]}
+        tenants.append(tenant_dict)
         return tenants
 
     def _create_users(self):
-        # NOTE(msdubov): This should be called after _create_tenants().
-        threads = self.config["resource_management_workers"]
-        users_per_tenant = self.config["users_per_tenant"]
-
         users = []
+        user_id     = self.user_context["user_id"]
+        username    = self.user_context["username"]
+        password    = self.user_context["password"]
+        project_dom = self.config["project_domain"]
+        user_dom    = self.config["user_domain"]
 
-        def publish(queue):
-            for tenant in self.context["tenants"]:
-                for user_id in range(users_per_tenant):
-                    username = self.PATTERN_USER % {"tenant_id": tenant["id"],
-                                                    "uid": user_id}
-                    password = str(uuid.uuid4())
-                    args = (username, password, self.config["project_domain"],
-                            self.config["user_domain"], tenant)
-                    queue.append(args)
+        for tenant in self.context["tenants"]:
+            clients = osclients.Clients(self.endpoint)
+            client  = keystone.wrap(clients.keystone())
 
-        def consume(cache, args):
-            username, password, project_dom, user_dom, tenant = args
-            if "client" not in cache:
-                clients = osclients.Clients(self.endpoint)
-                cache["client"] = keystone.wrap(clients.keystone())
-            client = cache["client"]
-            user = client.create_user(username, password,
-                                      "%s@email.me" % username,
-                                      tenant["id"], user_dom)
             user_endpoint = endpoint.Endpoint(
-                    client.auth_url, user.name, password, tenant["name"],
-                    consts.EndpointPermission.USER, client.region_name,
-                    project_domain_name=project_dom, user_domain_name=user_dom)
-            users.append({"id": user.id,
+                client.auth_url, username, password, tenant["name"],
+                consts.EndpointPermission.USER, client.region_name,
+                project_domain_name=project_dom, user_domain_name=user_dom)
+            users.append({"id": user_id,
                           "endpoint": user_endpoint,
                           "tenant_id": tenant["id"]})
-
-        # NOTE(msdubov): cosume() will fill the users list in the closure.
-        broker.run(publish, consume, threads)
         return users
 
     def _delete_tenants(self):
@@ -254,5 +238,6 @@ class UserGenerator(base.Context):
     @rutils.log_task_wrapper(LOG.info, _("Exit context: `users`"))
     def cleanup(self):
         """Delete tenants and users, using the broker pattern."""
+	return # don't delete tenants and users
         self._delete_users()
         self._delete_tenants()

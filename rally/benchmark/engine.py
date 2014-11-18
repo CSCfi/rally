@@ -98,6 +98,10 @@ class BenchmarkEngine(object):
         self.config = config
         self.task = task
 
+        for scenario, values in config.iteritems():
+            for pos, kw in enumerate(values):
+                self.user_context = kw.get("context", {})
+
     @rutils.log_task_wrapper(LOG.info,
                              _("Task validation of scenarios names."))
     def _validate_config_scenarios_name(self, config):
@@ -145,7 +149,8 @@ class BenchmarkEngine(object):
         #                 we will have pre-created users mode as well.
         context = {
             "task": self.task,
-            "admin": {"endpoint": self.admin_endpoint}
+            "admin": {"endpoint": self.admin_endpoint},
+            "user_context": self.user_context
         }
         with users_ctx.UserGenerator(context) as ctx:
             ctx.setup()
@@ -186,7 +191,8 @@ class BenchmarkEngine(object):
             "task": self.task,
             "admin": {"endpoint": endpoint},
             "scenario_name": name,
-            "config": scenario_context
+            "config": scenario_context,
+            "user_context": self.user_context
         }
 
         return context_obj
@@ -215,6 +221,7 @@ class BenchmarkEngine(object):
 
                 context_obj = self._prepare_context(kw.get("context", {}),
                                                     name, self.admin_endpoint)
+
                 try:
                     with base_ctx.ContextManager(context_obj):
                         self.duration = runner.run(name, context_obj,
