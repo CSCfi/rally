@@ -121,10 +121,11 @@ class Clients(object):
         try:
             # Ensure that user is admin
             client = self.keystone()
-            if 'admin' not in [role.lower() for role in
-                               client.auth_ref.role_names]:
-                raise exceptions.InvalidAdminException(
-                    username=self.endpoint.username)
+	    # Do not check for admin role
+            #if 'admin' not in [role.lower() for role in
+            #                   client.auth_ref.role_names]:
+            #    raise exceptions.InvalidAdminException(
+            #        username=self.endpoint.username)
         except keystone_exceptions.Unauthorized:
             raise exceptions.InvalidEndpointsException()
         except keystone_exceptions.AuthorizationFailure:
