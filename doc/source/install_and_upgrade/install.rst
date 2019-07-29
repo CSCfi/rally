@@ -79,6 +79,7 @@ available options:
                              If neither '-r' nor '-R' is set default behaviour is to ask.
       -R, --no-recreate      Do not remove target directory if it already exist.
                              If neither '-r' nor '-R' is set default behaviour is to ask.
+      -e, --db-ensure        Do not recreate database, instead ensure it exists.
       -y, --yes              Do not ask for confirmation: assume a 'yes' reply
                              to every question.
       -D, --dbtype TYPE      Select the database type. TYPE can be one of

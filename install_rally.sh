@@ -19,6 +19,7 @@ running_as_root() {
 
 VERBOSE=""
 ASKCONFIRMATION=1
+RECREATEDB="yes"
 RECREATEDEST="ask"
 USEVIRTUALENV="yes"
 DEVELOPMENT_MODE="false"
@@ -175,6 +176,7 @@ $GREEN  -r, --recreate        $NO_COLOR Remove target directory if it already ex
                          If neither '-r' nor '-R' is set default behaviour is to ask.
 $GREEN  -R, --no-recreate     $NO_COLOR Do not remove target directory if it already exist.
                          If neither '-r' nor '-R' is set default behaviour is to ask.
+$GREEN  -e, --ensure-db       $NO_COLOR Do not recreate database, instead ensure it exists.
 $GREEN  -y, --yes             $NO_COLOR Do not ask for confirmation: assume a 'yes' reply
                          to every question.
 $GREEN  -D, --dbtype TYPE     $NO_COLOR Select the database type. TYPE can be one of
@@ -456,7 +458,13 @@ setup_rally_configuration () {
     sed "s|#connection *=.*|connection = \"$DBCONNSTRING\"|" "$ETCDIR"/rally.conf > "$CONF_TMPFILE"
     cat "$CONF_TMPFILE" > "$ETCDIR"/rally.conf
     rm "$CONF_TMPFILE"
-    rally db recreate
+
+    if [ $RECREATEDB = 'yes' ];
+    then
+        rally db recreate
+    else
+        rally db ensure
+    fi
 }
 
 rally_venv () {
@@ -520,6 +528,9 @@ do
             ;;
         -R|--no-recreate)
             RECREATEDEST=no
+            ;;
+        -e|--ensure-db)
+            RECREATEDB=no
             ;;
         -y|--yes)
             ASKCONFIRMATION=0
