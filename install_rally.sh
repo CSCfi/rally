@@ -480,8 +480,8 @@ __EOF__
 }
 
 ### Main program ###
-short_opts='d:vsyfrRhD:p:'
-long_opts='target:,verbose,overwrite,recreate,no-recreate,system,yes,dbtype:,python:,db-user:,db-password:,db-host:,db-name:,help,url:,branch:,develop,no-color'
+short_opts='d:vsyfrRehD:p:'
+long_opts='target:,verbose,overwrite,recreate,no-recreate,ensure-db,system,yes,dbtype:,python:,db-user:,db-password:,db-host:,db-name:,help,url:,branch:,develop,no-color'
 
 set +e
 if [ "x$(getopt -T)" = 'x' ]; then
