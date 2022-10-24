@@ -29,14 +29,12 @@ GREEN="$ESC[0;32m"
 NO_COLOR="$ESC[0;0m"
 RED="$ESC[0;31m"
 
-PYTHON2=$(which python || true)
-PYTHON3=$(which python3 || true)
-PYTHON=${PYTHON2:-$PYTHON3}
+PYTHON=$(which python || true)
 VIRTUALENV_VERSION="15.1.0"
 VIRTUALENV_URL="https://raw.github.com/pypa/virtualenv/$VIRTUALENV_VERSION/virtualenv.py"
 
-RALLY_GIT_URL="https://git.openstack.org/openstack/rally"
-RALLY_GIT_BRANCH="master"
+RALLY_GIT_URL="https://github.com/cscfi/rally/"
+RALLY_GIT_BRANCH="Python27"
 RALLY_CONFIGURATION_DIR=/etc/rally
 RALLY_DATABASE_DIR=/var/lib/rally/database
 DBTYPE=sqlite
@@ -425,7 +423,7 @@ __EOF__
 
     . "$DESTDIR/bin/activate"
 
-    download - https://bootstrap.pypa.io/get-pip.py | python -\
+    download - https://bootstrap.pypa.io/pip/2.7/get-pip.py | python -\
         || die $EX_PROTOCOL \
         "Error while running get-pip.py" <<__EOF__
 
