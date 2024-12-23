@@ -29,4 +29,4 @@ RUN mkdir -p /home/rally/.rally && rally db recreate
 # attached for the first time (volume initialization)
 VOLUME ["/home/rally/.rally"]
 # ENTRYPOINT ["rally"]
-ENTRYPOINT ["python3 -c 'import time; time.sleep(9999)'"]
+ENTRYPOINT ["python3", "loop.py"]
