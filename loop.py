@@ -1,2 +1,3 @@
 import time
-time.sleep(999999)
+while true:
+    time.sleep(999999)
