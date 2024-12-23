@@ -28,5 +28,4 @@ RUN mkdir -p /home/rally/.rally && rally db recreate
 # Data generated during the image creation is copied to volume only when it's
 # attached for the first time (volume initialization)
 VOLUME ["/home/rally/.rally"]
-# ENTRYPOINT ["rally"]
-ENTRYPOINT ["python3", "loop.py"]
+ENTRYPOINT ["rally"]
