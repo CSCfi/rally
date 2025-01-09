@@ -11,6 +11,9 @@ RUN apt-get update && apt-get install --yes sudo vim git-core build-essential &&
 COPY ./ /rally/source
 WORKDIR /rally/source
 
+# ensure Pip is updated
+RUN pip3 install -U pip
+
 RUN python3 -m pip install . --constraint upper-constraints.txt --no-cache-dir && \
     python3 -m pip install pymysql psycopg2-binary --no-cache-dir && \
     mkdir -p /etc/rally && \
